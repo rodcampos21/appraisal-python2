@@ -45,10 +45,10 @@ Sintaxe:
 
 Na sintaxe acima:
 
-- **ofile**: nome do arquivo original, sem dados faltantes, em formato csv.
-- **ffile**: nome do arquivo resultante da execução de um plano de imputação (usando o módulo Crowner), em formato csv.
-- **att**: nome do atributo sobre o qual fazer a comparação.
-- **measure**: métrica de erro a ser usada.
+- **ifile**: nome do arquivo de entrada, em formato csv.
+- **ofile**: nome do arquivo de saída, em formato csv.
+- **att**: nome do atributo sobre o qual preencher os valores ausentes.
+- **plan**: plano de imputação a ser usado. O valor default deste argumento deve ser "mean", o que significa que os valores ausentes devem ser preenchidos com a média dos valores existentes.
 
 Um exemplo de chamada do módulo Crowner é o seguinte:
 
