@@ -24,7 +24,7 @@ class Eraser:
         data = pd.read_csv(input_file)
         data[attribute] = self.strategy.execute(data[attribute], missing_rate)
         data.to_csv(self.handle_output_file_name(output_file), index=False)
-        print(f"Arquivo {self.handle_output_file_name(output_file)} gerado com sucesso")
+        print(f"File '{self.handle_output_file_name(output_file)}' successfully generated")
     
     def handle_output_file_name(self, output_file) -> str:
         """
