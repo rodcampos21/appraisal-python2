@@ -43,10 +43,10 @@ class NMAR(IMissingDataStrategy):
         """
         Input and validate an operator
         """
-        operator = input("Type in one of the following operators: =, >, >=, <, <=\n")
+        operator = input("Type in one of the following operators: ==, >, >=, <, <=\n")
 
-        if operator not in ["=", ">", ">=", "<", "<="]:
-            raise ValueError(f"Invalid operator '{operator}'. Should be one of (=, >, >=, <, <=)")
+        if operator not in ["==", ">", ">=", "<", "<="]:
+            raise ValueError(f"Invalid operator '{operator}'. Should be one of (==, >, >=, <, <=)")
 
         return operator
 
@@ -73,15 +73,6 @@ class NMAR(IMissingDataStrategy):
 
         df = pd.DataFrame({'col': column})
 
-        if operator == "=":
-            df.loc[df.query(f"col == {value}").sample(frac=missing_rate).index, 'col'] = NaN
-        elif operator == ">":
-            df.loc[df.query(f"col > {value}").sample(frac=missing_rate).index, 'col'] = NaN
-        elif operator == ">=":
-            df.loc[df.query(f"col >= {value}").sample(frac=missing_rate).index, 'col'] = NaN
-        elif operator == "<":
-            df.loc[df.query(f"col < {value}").sample(frac=missing_rate).index, 'col'] = NaN
-        elif operator == "<=":
-            df.loc[df.query(f"col <= {value}").sample(frac=missing_rate).index, 'col'] = NaN
+        df.loc[df.query(f"col {operator} {value}").sample(frac=missing_rate).index, 'col'] = NaN
 
         return df.col
