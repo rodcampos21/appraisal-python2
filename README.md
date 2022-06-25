@@ -35,6 +35,12 @@ Um exemplo de chamada do módulo Eraser é o seguinte:
 
     python eraser.py -i iris.csv -o iris_missing.csv -m MCAR -a SepalLength -r .3
 
+Em caso do mecanismo escolhido ser o NMAR, deve-se incluir um parâmetro adicional **query**, que recebe uma expressão para filtro nos valores 'x' da coluna do atributo escolhido. Tokens aceitos: x, ==, >, >=, <, <=, &, |, (,).
+
+Um exemplo de uso para este caso é o seguinte:
+
+    python eraser.py -i iris.csv -o iris_missing.csv -m NMAR -a "sepal.length" -r .7 -q "x >= 1 | x<=6"
+
 ### Crowner
 
 Módulo responsável pela imputação de dados numa coluna.
