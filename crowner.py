@@ -5,6 +5,7 @@ from utils import Csv, Logging
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
+from scipy import stats
 
 
 class AbstractImputationPlan(ABC):
@@ -39,6 +40,48 @@ class Mean(AbstractImputationPlan):
         _mean = df[column_name].mean()
         df[column_name] = df[column_name].replace(np.nan, _mean)
         return df
+
+
+class NormalDistribution(AbstractImputationPlan):
+    """
+        Implement a imputation plan strategy.
+
+        Compute the missing values, inserting random data from
+        a normal distribution.
+    """
+
+    def strategy(self, df: DataFrame, column_name: str) -> DataFrame:
+        """_summary_
+
+        Args:
+            df (DataFrame): An Pandas dataframe.
+            column_name (str): A column name from the dataframe.
+
+        Returns:
+            DataFrame: Return the computed dataframe.
+        """
+        column_data = df[column_name]
+
+        _not_missing_data = df[column_data.notnull()][column_name]
+        
+        missing_size = df[column_name].size - _not_missing_data.size
+        
+        
+        mean = np.mean(_not_missing_data)
+        std = np.std(_not_missing_data)
+        
+        r = np.random.normal(mean, std, missing_size)
+        
+        _loc = df[column_name].loc()
+        _loc[df[column_name].isnull()] = r
+        
+        # df[column_data.isnull()] = r
+        
+        return df
+
+        # _norm = stats.norm(_not_missing_data[column_name])
+
+        # raise NotImplementedError()
 
 
 class Crowner:
@@ -79,7 +122,7 @@ class Crowner:
         if self._result.empty:
             raise Exception("unhandled exception.")
 
-        self._result.to_csv(name)
+        self._result.to_csv(name, index=False)
 
 
 # Parse arguments
@@ -110,6 +153,8 @@ def crowner(input_file, output_file, column_name, plan):
 
     if plan == 'mean':
         strategy = Mean()
+    elif plan in ["nd", "normal_distribution"]:
+        strategy = NormalDistribution()
     else:
         raise Exception("")
 
