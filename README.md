@@ -78,3 +78,11 @@ Na sintaxe acima:
 Um exemplo de chamada do módulo Reviewer é o seguinte:
 
     python reviewer.py -o iris.csv -o iris_filled.csv -m MSE -a SepalLength
+
+### Testes Unitários
+
+Os módulos de testes unitários estão agrupados na pasta 'Tests'.
+
+Um exemplo de executação dos testes unitários de um módulo:
+
+    python -m unittest Tests/test_eraser.py
