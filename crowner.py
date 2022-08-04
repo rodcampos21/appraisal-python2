@@ -6,7 +6,8 @@ import pandas as pd
 from pandas import DataFrame
 import numpy as np
 from scipy import stats
-
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import MinMaxScaler
 
 class AbstractImputationPlan(ABC):
     """
@@ -75,14 +76,34 @@ class NormalDistribution(AbstractImputationPlan):
         _loc = df[column_name].loc()
         _loc[df[column_name].isnull()] = r
         
-        # df[column_data.isnull()] = r
-        
         return df
 
-        # _norm = stats.norm(_not_missing_data[column_name])
 
-        # raise NotImplementedError()
+class KNN(AbstractImputationPlan):
+    """
+        Implement a imputation plan strategy.
 
+        Compute the missing values, inserting random data from
+        a normal distribution.
+    """
+
+    def strategy(self, df: DataFrame, column_name: str) -> DataFrame:
+        """_summary_
+
+        Args:
+            df (DataFrame): An Pandas dataframe.
+            column_name (str): A column name from the dataframe.
+
+        Returns:
+            DataFrame: Return the computed dataframe.
+        """
+        scaler = MinMaxScaler()
+        knn = KNNImputer(n_neighbors=5)
+
+        df_scaled = pd.DataFrame(scaler.fit_transform(df), columns = df.columns)
+        df_knn = pd.DataFrame(knn.fit_transform(df_scaled),columns = df_scaled.columns)
+        
+        return df_knn 
 
 class Crowner:
     """
@@ -150,11 +171,15 @@ def crowner(input_file, output_file, column_name, plan):
     """
 
     strategy = None
+    
+    plan = plan.lower()
 
     if plan == 'mean':
         strategy = Mean()
     elif plan in ["nd", "normal_distribution"]:
         strategy = NormalDistribution()
+    elif plan in ["knn"]:
+        strategy = KNN()
     else:
         raise Exception("")
 
