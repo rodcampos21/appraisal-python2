@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from typing import Optional, Union
-from utils import Csv, Logging
+from utils import CategoricalDataException, Csv, Logging
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
@@ -9,23 +9,24 @@ from scipy import stats
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import MinMaxScaler
 
+
 class AbstractImputationPlan(ABC):
     """
-        Abstract base class ImputationPlan.
-        All imputation plans needs inherit from this base class.
+    Abstract base class ImputationPlan.
+    All imputation plans needs inherit from this base class.
     """
 
     @abstractmethod
     def strategy(self, csv: Csv, column_name: str):
         """
-            Abstract Strategy
+        Abstract Strategy
         """
         raise NotImplementedError()
 
 
 class Mean(AbstractImputationPlan):
     """
-        Implement a imputation plan strategy.
+    Implement a imputation plan strategy.
     """
 
     def strategy(self, df: DataFrame, column_name: str) -> DataFrame:
@@ -45,10 +46,10 @@ class Mean(AbstractImputationPlan):
 
 class NormalDistribution(AbstractImputationPlan):
     """
-        Implement a imputation plan strategy.
+    Implement a imputation plan strategy.
 
-        Compute the missing values, inserting random data from
-        a normal distribution.
+    Compute the missing values, inserting random data from
+    a normal distribution.
     """
 
     def strategy(self, df: DataFrame, column_name: str) -> DataFrame:
@@ -64,27 +65,26 @@ class NormalDistribution(AbstractImputationPlan):
         column_data = df[column_name]
 
         _not_missing_data = df[column_data.notnull()][column_name]
-        
+
         missing_size = df[column_name].size - _not_missing_data.size
-        
-        
+
         mean = np.mean(_not_missing_data)
         std = np.std(_not_missing_data)
-        
+
         r = np.random.normal(mean, std, missing_size)
-        
+
         _loc = df[column_name].loc()
         _loc[df[column_name].isnull()] = r
-        
+
         return df
 
 
 class KNN(AbstractImputationPlan):
     """
-        Implement a imputation plan strategy.
+    Implement a imputation plan strategy.
 
-        Compute the missing values, inserting random data from
-        a normal distribution.
+    Compute the missing values, inserting random data from
+    a normal distribution.
     """
 
     def strategy(self, df: DataFrame, column_name: str) -> DataFrame:
@@ -97,17 +97,25 @@ class KNN(AbstractImputationPlan):
         Returns:
             DataFrame: Return the computed dataframe.
         """
-        scaler = MinMaxScaler()
-        knn = KNNImputer(n_neighbors=5)
+        try:
+            scaler = MinMaxScaler()
+            knn = KNNImputer(n_neighbors=5)
 
-        df_scaled = pd.DataFrame(scaler.fit_transform(df), columns = df.columns)
-        df_knn = pd.DataFrame(knn.fit_transform(df_scaled),columns = df_scaled.columns)
-        
-        return df_knn 
+            df_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+            df_knn = pd.DataFrame(
+                knn.fit_transform(df_scaled), columns=df_scaled.columns
+            )
+
+            return df_knn
+        except ValueError as e:
+            raise CategoricalDataException(
+                "csv contains categorical data, preprocess the dataset before."
+            ) from e
+
 
 class Crowner:
     """
-        Implement the crowner.
+    Implement the crowner.
     """
 
     def __init__(
@@ -122,12 +130,14 @@ class Crowner:
         self.strategy = strategy
         self.debugger = debugger
         self._result = None
+        self._df = None
 
     def run(self) -> None:
         """
-            Execute the Cronwer runner.
+        Execute the Cronwer runner.
         """
         df = pd.read_csv(self.csv)
+        self._df = df
         df_result = self.strategy.strategy(df, self.column_name)
         self._result = df_result
 
@@ -146,17 +156,6 @@ class Crowner:
         self._result.to_csv(name, index=False)
 
 
-# Parse arguments
-parser = ArgumentParser()
-parser.add_argument("-i", "--input_file", help="Name of the input file")
-parser.add_argument("-o", "--output_file", help="Name of the output file")
-parser.add_argument("-a", "--attribute",
-                    help="Name of the column to fills in the missing values.")
-parser.add_argument("-p", "--plan", default='mean',
-                    help="imputation plan to be used. The default value of this is mean")
-args = vars(parser.parse_args())
-
-
 def crowner(input_file, output_file, column_name, plan):
     """_summary_
 
@@ -171,10 +170,10 @@ def crowner(input_file, output_file, column_name, plan):
     """
 
     strategy = None
-    
+
     plan = plan.lower()
 
-    if plan == 'mean':
+    if plan == "mean":
         strategy = Mean()
     elif plan in ["nd", "normal_distribution"]:
         strategy = NormalDistribution()
@@ -191,10 +190,25 @@ def crowner(input_file, output_file, column_name, plan):
 
 
 def main():
-    input_file = args['input_file']
-    output_file = args['output_file']
-    attribute = args['attribute']
-    plan = args['plan']
+    # Parse arguments
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--input_file", help="Name of the input file")
+    parser.add_argument("-o", "--output_file", help="Name of the output file")
+    parser.add_argument(
+        "-a", "--attribute", help="Name of the column to fills in the missing values."
+    )
+    parser.add_argument(
+        "-p",
+        "--plan",
+        default="mean",
+        help="imputation plan to be used. The default value of this is mean",
+    )
+    args = vars(parser.parse_args())
+
+    input_file = args["input_file"]
+    output_file = args["output_file"]
+    attribute = args["attribute"]
+    plan = args["plan"]
     crowner(input_file, output_file, attribute, plan)
 
 
