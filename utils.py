@@ -20,7 +20,12 @@ class Csv:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.file.close()
-        
+
+
+class CategoricalDataException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 
 def missing_rate_float(x: float) -> float:
     """
@@ -32,7 +37,7 @@ def missing_rate_float(x: float) -> float:
         raise ArgumentTypeError("%r not a floating-point literal" % (x,))
 
     if x < 0.0 or x > 1.0:
-        raise ArgumentTypeError("%r not in range [0.0, 1.0]"%(x,))
+        raise ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
     return x
 
 
@@ -45,7 +50,7 @@ def str_to_class(module_name: str, class_name: str):
         try:
             class_ = getattr(module_, class_name)()
         except AttributeError:
-            print('Class does not exist')
+            print("Class does not exist")
     except ImportError:
-        print('Module does not exist')
+        print("Module does not exist")
     return class_ or None
