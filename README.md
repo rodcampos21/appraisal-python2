@@ -33,7 +33,7 @@ Na sintaxe acima:
 
 Um exemplo de chamada do módulo Eraser é o seguinte:
 
-    python eraser.py -i iris.csv -o iris_missing.csv -m MCAR -a SepalLength -r .3
+    python eraser.py -i iris.csv -o iris_missing.csv -m MCAR -a sepal.length -r .3
 
 Em caso do mecanismo escolhido ser o NMAR, deve-se incluir um parâmetro adicional **query**, que recebe uma expressão para filtro nos valores 'x' da coluna do atributo escolhido. Tokens aceitos: x, ==, >, >=, <, <=, &, |, (,).
 
@@ -58,7 +58,7 @@ Na sintaxe acima:
 
 Um exemplo de chamada do módulo Crowner é o seguinte:
 
-    python crowner.py -i iris_missing.csv -o iris_filled.csv -p mean
+    python crowner.py -i iris_missing.csv -o iris_filled.csv -p mean -a sepal.length
 
 ### Reviewer
 
@@ -77,7 +77,7 @@ Na sintaxe acima:
 
 Um exemplo de chamada do módulo Reviewer é o seguinte:
 
-    python reviewer.py -o iris.csv -o iris_filled.csv -m MSE -a SepalLength
+    python reviewer.py -o iris.csv -f iris_filled.csv -m MSE -a sepal.length
 
 ### Testes Unitários
 
