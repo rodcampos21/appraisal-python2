@@ -69,7 +69,7 @@ def main():
     query = args["query"]
 
     strategy = str_to_class(MISSING_DATA_STRATEGY_MODULE, mechanism)
-    eraser = Eraser(strategy, attribute, query, missing_rate)
+    eraser = Eraser(strategy, attribute, missing_rate, query)
     eraser(input_file)
     eraser.save(output_file)
 
