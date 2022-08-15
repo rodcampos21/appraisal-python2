@@ -1,50 +1,29 @@
 from argparse import ArgumentParser
 from typing import Optional, Union
-from Strategy.ImputationPlanStrategy import IImputationPlanStrategy, KNN, Mean, NormalDistribution
+from Strategy.ImputationPlanStrategy import (
+    IImputationPlanStrategy,
+    KNN,
+    Mean,
+    NormalDistribution,
+)
+from pipeline import Component
 from utils import Csv, Logging
 import pandas as pd
 
-class Crowner:
 
+class Crowner(Component):
     def __init__(
         self,
-        csv: Csv,
-        column_name: str,
         strategy: IImputationPlanStrategy,
-        debugger: Union[Logging, Optional[None]] = Logging(),
+        column_name: str,
+        logger: Union[Logging, Optional[None]] = Logging(),
     ) -> None:
-        self.csv = csv
-        self.column_name = column_name
-        self.strategy = strategy
-        self.debugger = debugger
-        self._result = None
-        self._df = None
+        super().__init__(strategy, column_name, logger=logger)
 
-    def run(self) -> None:
-        """
-        Execute the Cronwer runner.
-        """
-        df = pd.read_csv(self.csv)
-        self._df = df
-        df_result = self.strategy.execute(df, self.column_name)
-        self._result = df_result
+        # remove unnecessary parameters for strategy
+        self._kwargs.pop("missing_rate")
+        self._kwargs.pop("query")
 
-    def save_result(self, name: Optional[str] = None) -> None:
-        """_summary_
-
-        Args:
-            name (Optional[str], optional): _description_. Defaults to None.
-
-        Raises:
-            Exception: _description_
-        """
-        if self._result.empty:
-            raise Exception("unhandled exception.")
-
-        self._result.to_csv(name, index=False)
-
-        print("Imputation of values succeeded.")
-        print(f"File {name} successfully generated.")
 
 def crowner(input_file, output_file, column_name, plan):
     """_summary_
@@ -72,11 +51,9 @@ def crowner(input_file, output_file, column_name, plan):
     else:
         raise Exception("")
 
-    with Csv(input_file, "r") as csv:
-        column_name = column_name
-        crowner = Crowner(csv, column_name, strategy)
-        crowner.run()
-        crowner.save_result(output_file)
+    crowner = Crowner(strategy, column_name)
+    crowner(input_file)
+    crowner.save(output_file)
 
 
 def main():
@@ -85,7 +62,10 @@ def main():
     parser.add_argument("-i", "--input_file", help="Name of the input file")
     parser.add_argument("-o", "--output_file", help="Name of the output file")
     parser.add_argument(
-        "-a", "--attribute", help="Name of the column with erased values to fill."
+        "-a",
+        "--attribute",
+        help="Name of the column with erased values to fill.",
+        required=True,
     )
     parser.add_argument(
         "-p",
