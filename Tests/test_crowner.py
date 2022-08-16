@@ -23,7 +23,7 @@ class TestCrowner(unittest.TestCase):
         column_name = "sepal.length"
         strategy = Mean()
 
-        crowner = Crowner(self.input_file, column_name, strategy, logging_mock)
+        crowner = Crowner(strategy, column_name, logging_mock)
         df_before = pd.read_csv(self.input_file)
 
         count_nan = df_before[column_name].isna().sum()
@@ -33,9 +33,9 @@ class TestCrowner(unittest.TestCase):
 
         # Act
 
-        crowner.run()
-        count_nan_after = crowner._result[column_name].isna().sum()
-        total = crowner._result[column_name].count()
+        crowner(self.input_file)
+        count_nan_after = crowner._output[column_name].isna().sum()
+        total = crowner._output[column_name].count()
 
         # Assert
         self.assertEqual(0, count_nan_after)
@@ -51,7 +51,7 @@ class TestCrowner(unittest.TestCase):
         column_name = "sepal.length"
         strategy = NormalDistribution()
 
-        crowner = Crowner(self.input_file, column_name, strategy, logging_mock)
+        crowner = Crowner(strategy, column_name, logging_mock)
         df_before = pd.read_csv(self.input_file)
 
         count_nan = df_before[column_name].isna().sum()
@@ -61,9 +61,9 @@ class TestCrowner(unittest.TestCase):
 
         # Act
 
-        crowner.run()
-        count_nan_after = crowner._result[column_name].isna().sum()
-        total = crowner._result[column_name].count()
+        crowner(self.input_file)
+        count_nan_after = crowner._output[column_name].isna().sum()
+        total = crowner._output[column_name].count()
 
         # Assert
         self.assertEqual(0, count_nan_after)
@@ -81,11 +81,10 @@ class TestCrowner(unittest.TestCase):
         column_name = "sepal.length"
         strategy = KNN()
 
-        crowner = Crowner(self.input_file, column_name, strategy, logging_mock)
-
+        crowner = Crowner(strategy, column_name, logging_mock)
         # Act/Assert
         with self.assertRaises(CategoricalDataException) as e:
-            crowner.run()
+            crowner(self.input_file)
 
     def test_crowner_knn_strategy_success(self):
         """
@@ -97,9 +96,7 @@ class TestCrowner(unittest.TestCase):
         column_name = "sepal.length"
         strategy = KNN()
 
-        crowner = Crowner(
-            self.input_file_non_categorical, column_name, strategy, logging_mock
-        )
+        crowner = Crowner(strategy, column_name, logging_mock)
         df_before = pd.read_csv(self.input_file_non_categorical)
 
         count_nan = df_before[column_name].isna().sum()
@@ -109,9 +106,9 @@ class TestCrowner(unittest.TestCase):
 
         # Act
 
-        crowner.run()
-        count_nan_after = crowner._result[column_name].isna().sum()
-        total = crowner._result[column_name].count()
+        crowner(self.input_file_non_categorical)
+        count_nan_after = crowner._output[column_name].isna().sum()
+        total = crowner._output[column_name].count()
 
         # Assert
         self.assertEqual(0, count_nan_after)
