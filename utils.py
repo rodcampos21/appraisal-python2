@@ -2,10 +2,39 @@ import importlib
 from typing import Optional, Union
 import logging
 from argparse import ArgumentTypeError
+import sys
 
 
 class Logging:
-    ...
+    """
+    Its a simple wrapper for logging module.
+    """
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    def __init__(self, *args, **kwargs) -> None:
+        ...
+
+    def debug(self, msg: object, *args: object, **kwargs):
+        self.logger.debug(msg, *args, **kwargs)
+
+    def critical(self, msg: object, *args: object, **kwargs):
+        self.logger.critical(msg, *args, **kwargs)
+
+    def warn(self, msg: object, *args: object, **kwargs):
+        self.logger.warn(msg, *args, **kwargs)
+
+    def info(self, msg: object, *args: object, **kwargs):
+        self.logger.info(msg, *args, **kwargs)
 
 
 class Csv:

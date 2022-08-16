@@ -2,48 +2,76 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Union
 
-if TYPE_CHECKING:
-    from crowner import Crowner
-    from eraser import Eraser
-    from reviewer import Reviewer
 
 from pandas import DataFrame as _DataFrame
 import pandas as pd
 
-
-from Strategy.ImputationPlanStrategy import IImputationPlanStrategy, Mean
-from Strategy.MeasureStrategy import IMeasureStrategy
-from Strategy.MissingDataStrategy import IMissingDataStrategy
 from utils import Logging
 
 
 class Pipeline:
-    def __init__(self, *args, **kwargs) -> None:
-        self._logger = None
+    def __init__(self, logger=Logging()) -> None:
+        self._logger = logger
         self._input = None
         self._output = None
+        self._n = 0
+        self._components = list()
 
-        self._components = set()
+    def __repr__(self) -> str:
+        return "[{}]".format(self.__class__.__name__)
 
-    def config(self) -> object:
-        ...
+    def __len__(self):
+        return len(self._components)
 
-    def input(self) -> object:
-        ...
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._n < len(self):
+            aux = self._components[self._n]
+            self._n += 1
+            return aux
+        else:
+            raise StopIteration()
+
+    def add_component(self, component):
+        self._components.append(component)
+        return self
+
+    def add_component_list(self, component_list: list):
+        self._components.extend(component_list)
+        return self
 
     def save(self) -> None:
-        ...
+        self._output.to_csv(self._output, index=False)
+        self._logger.info(f"{self} File {self._output} successfully generated.")
 
+    @property
     def output(self) -> None:
-        ...
+        return self._output
 
-    def __call__(self) -> _DataFrame:
-        ...
+    def __call__(self, input: _DataFrame) -> _DataFrame:
+        self._logger.info("{} Starting pipeline...".format(self))
+        aux = input
+        for c in self:
+            if c.__class__.__name__.upper() == "REVIWER":
+                aux = c(input, aux)._output
+            else:
+                aux = c(aux)._output
+
+        self._logger.info("{} Finishing pipeline...".format(self))
+
+        return self
 
 
 class Component:
     def __init__(
-        self, strategy, column_name, query=None, missing_rate=None, logger=None
+        self,
+        strategy,
+        column_name,
+        query=None,
+        missing_rate=None,
+        logger: Logging = Logging(),
     ):
         self._strategy = strategy
         self._logger = logger
@@ -57,6 +85,11 @@ class Component:
             "missing_rate": missing_rate,
             "query": query,
         }
+
+    def __repr__(self) -> str:
+        return "[{}-{}]".format(
+            self.__class__.__name__, self._strategy.__class__.__name__
+        )
 
     def save(self, output: str):
         """_summary_
@@ -72,20 +105,26 @@ class Component:
 
         self._output.to_csv(output, index=False)
 
-        print("Imputation of values succeeded.")
-        print(f"File {output} successfully generated.")
+        self._logger.info(f"{self} File {output} successfully generated.")
 
     def __call__(self, input: _DataFrame) -> object:
         self._input = input
         if isinstance(input, str):
+            self._logger.info(
+                "{} Input is a string, going to read as csv.".format(self)
+            )
             self._input = pd.read_csv(input)
 
+        self._logger.info("{} Starting strategy.".format(self))
         self._output = self._strategy.execute(self._input, **self._kwargs)
+        self._logger.info("{} strategy worked successfully.".format(self))
+
+        return self
 
 
-class PipelineComponentBuilder:
+class ComponentBuilder:
     def __init__(self, Component) -> None:
-        self.Componet = Component
+        self.Component = Component
         self._kwargs = dict()
 
     def strategy(self, strategy):
@@ -97,49 +136,16 @@ class PipelineComponentBuilder:
         return self
 
     def query(self, query: str):
-        if isinstance(self.Component, Eraser):
-            self._kwargs["query"] = query
-        else:
-            raise TypeError("Query cannot be used with {} type".format(self.Componet))
-
+        self._kwargs["query"] = query
         return self
 
     def missing_rate(self, missing_rate: float):
-        if isinstance(self.Component, Eraser):
-            self._kwargs["missing_rate"] = missing_rate
-        else:
-            raise TypeError(
-                "missing rate cannot be used with {} type".format(self.Componet)
-            )
+        self._kwargs["missing_rate"] = missing_rate
         return self
 
-    def __call__(self) -> object:
-        return self.Componet(**self._kwargs)
-
-    def __init__(
-        self,
-        component_class: Union[Eraser, Crowner, Reviewer],
-        strategy: Union[
-            IImputationPlanStrategy, IMeasureStrategy, IMissingDataStrategy
-        ],
-        data: dict,
-    ):
-        self._component_class = component_class
-        self._strategy = strategy
-        self._data = data
-        self.input: _DataFrame = None
-        self.output: _DataFrame = None
-
-    def __call__(self, pipeline_input: Union[str, _DataFrame], logger) -> object:
-        self.input = pipeline_input
-
-        self.output = self._component_class(
-            input=input, strategy=self._strategy, logger=logger, **self._data
-        )
-        return self
+    def build(self) -> object:
+        return self.Component(**self._kwargs)
 
 
 if __name__ == "__main__":
-    p = PipelineComponent(Crowner, Mean, {"column_name": "iris_missing"})
-    csv = pd.read_csv("iris_missing.csv")
-    print(p(csv, Logging()))
+    ...
