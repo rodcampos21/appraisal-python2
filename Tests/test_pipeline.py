@@ -25,7 +25,7 @@ class TestComponentBuilder(unittest.TestCase):
 
 class TestPipeline(unittest.TestCase):
     def setUp(self):
-        self.input_file = "iris_missing.csv"
+        self.input_file = "iris.csv"
         self.input_file_non_categorical = "iris_missing_noncategorical.csv"
         self.output_file = "crowner_test.csv"
 
@@ -82,4 +82,4 @@ class TestPipeline(unittest.TestCase):
             )
         )(self.input_file)
 
-        self.assertEqual(True, True)
+        self.assertIsNotNone(p.output)

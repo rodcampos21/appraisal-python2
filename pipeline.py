@@ -16,6 +16,7 @@ class Pipeline:
         self._output = None
         self._n = 0
         self._components = list()
+        self._review_output = None
 
     def __repr__(self) -> str:
         return "[{}]".format(self.__class__.__name__)
@@ -42,22 +43,28 @@ class Pipeline:
         self._components.extend(component_list)
         return self
 
-    def save(self) -> None:
-        self._output.to_csv(self._output, index=False)
-        self._logger.info(f"{self} File {self._output} successfully generated.")
+    def save(self, output) -> None:
+        self._output.to_csv(output, index=False)
+        self._logger.info(f"{self} File {output} successfully generated.")
 
     @property
     def output(self) -> None:
         return self._output
 
+    @property
+    def review_output(self) -> None:
+        return self._review_output
+
     def __call__(self, input: _DataFrame) -> _DataFrame:
         self._logger.info("{} Starting pipeline...".format(self))
         aux = input
         for c in self:
-            if c.__class__.__name__.upper() == "REVIWER":
+            if c.__class__.__name__.upper() == "REVIEWER":
                 aux = c(input, aux)._output
+                self._review_output = aux
             else:
                 aux = c(aux)._output
+                self._output = aux
 
         self._logger.info("{} Finishing pipeline...".format(self))
 
