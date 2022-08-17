@@ -64,9 +64,6 @@ class TestPipeline(unittest.TestCase):
         p = (
             Pipeline()
             .add_component(
-                ComponentBuilder(Preprocessor).strategy(CategoricalDataStrategy).build()
-            )
-            .add_component(
                 ComponentBuilder(Eraser)
                 .column_name("sepal.length")
                 .missing_rate(0.3)
