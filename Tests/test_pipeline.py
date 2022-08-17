@@ -1,9 +1,11 @@
 import unittest
 from Strategy.MeasureStrategy import MSE
 from Strategy.MissingDataStrategy import MCAR
+from Strategy.PreprocessorStrategy import CategoricalDataStrategy
 from eraser import Eraser
 from pipeline import *
 from crowner import *
+from preprocessor import Preprocessor
 from reviewer import Reviewer
 
 
@@ -61,6 +63,9 @@ class TestPipeline(unittest.TestCase):
     def test_pipeline_runnable(self):
         p = (
             Pipeline()
+            .add_component(
+                ComponentBuilder(Preprocessor).strategy(CategoricalDataStrategy).build()
+            )
             .add_component(
                 ComponentBuilder(Eraser)
                 .column_name("sepal.length")

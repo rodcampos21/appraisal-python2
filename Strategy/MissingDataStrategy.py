@@ -3,6 +3,8 @@ from numpy import NaN
 import pandas as pd
 import re
 
+from utils import Logging
+
 
 class IMissingDataStrategy(ABC):
     """
@@ -11,7 +13,12 @@ class IMissingDataStrategy(ABC):
 
     @abstractmethod
     def execute(
-        self, df: pd.Series, column_name: str, missing_rate: float, query: str
+        self,
+        df: pd.Series,
+        column_name: str,
+        missing_rate: float,
+        query: str,
+        logger: Logging,
     ) -> None:
         pass
 
@@ -22,7 +29,12 @@ class MCAR(IMissingDataStrategy):
     """
 
     def execute(
-        self, df: pd.Series, column_name: str, missing_rate: float, query: str
+        self,
+        df: pd.Series,
+        column_name: str,
+        missing_rate: float,
+        query: str,
+        logger: Logging,
     ) -> pd.Series:
         """
         Erase values from a series with MCAR pattern
@@ -38,7 +50,12 @@ class MAR(IMissingDataStrategy):
     """
 
     def execute(
-        self, df: pd.Series, column_name: str, missing_rate: float, query: str
+        self,
+        df: pd.Series,
+        column_name: str,
+        missing_rate: float,
+        query: str,
+        logger: Logging,
     ) -> pd.Series:
         """
         Erase values from a series with MAR pattern
@@ -52,7 +69,12 @@ class NMAR(IMissingDataStrategy):
     """
 
     def execute(
-        self, df: pd.Series, column_name: str, missing_rate: float, query: str
+        self,
+        df: pd.Series,
+        column_name: str,
+        missing_rate: float,
+        query: str,
+        logger: Logging,
     ) -> pd.Series:
         """
         Erase values from 'column' with NMAR pattern, filtering column by 'query' at a rate of 'missing_rate'

@@ -14,7 +14,6 @@ class Eraser(Component):
     def __init__(
         self, strategy, column_name, missing_rate, query=None, logger=Logging()
     ) -> None:
-        print(query)
         super().__init__(
             strategy,
             column_name,

@@ -10,6 +10,8 @@ from pipeline import Component
 from utils import Csv, Logging
 import pandas as pd
 
+PLAN_STRATEGY_MODULE = "Strategy.ImputationPlanStrategy"
+
 
 class Crowner(Component):
     def __init__(
@@ -71,6 +73,7 @@ def main():
         "-p",
         "--plan",
         default="mean",
+        choices=("mean", "nd", "normal_distribution", "knn"),
         help="imputation plan to be used. The default value of this is mean",
     )
     args = vars(parser.parse_args())

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from typing import TYPE_CHECKING
 from typing import Union
 
@@ -6,7 +7,7 @@ from typing import Union
 from pandas import DataFrame as _DataFrame
 import pandas as pd
 
-from utils import Logging
+from utils import CategoricalDataException, Logging, missing_rate_float, str_to_class
 
 
 class Pipeline:
@@ -58,13 +59,23 @@ class Pipeline:
     def __call__(self, input: _DataFrame) -> _DataFrame:
         self._logger.info("{} Starting pipeline...".format(self))
         aux = input
-        for c in self:
-            if c.__class__.__name__.upper() == "REVIEWER":
-                aux = c(input, aux)._output
-                self._review_output = aux
-            else:
-                aux = c(aux)._output
-                self._output = aux
+
+        try:
+            for c in self:
+                if c.__class__.__name__.upper() == "REVIEWER":
+                    aux = c(input, aux)._output
+                    self._review_output = aux
+                else:
+                    aux = c(aux)._output
+                    self._output = aux
+        except CategoricalDataException as e:
+            self._logger.info("{} Input {}...".format(self, str(e)))
+        except Exception as e:
+            self._logger.info(
+                "{} Unexpected error while processing the pipeline..., {}".format(
+                    self, str(e)
+                )
+            )
 
         self._logger.info("{} Finishing pipeline...".format(self))
 
@@ -75,7 +86,7 @@ class Component:
     def __init__(
         self,
         strategy,
-        column_name,
+        column_name="",
         query=None,
         missing_rate=None,
         logger: Logging = Logging(),
@@ -91,6 +102,7 @@ class Component:
             "column_name": column_name,
             "missing_rate": missing_rate,
             "query": query,
+            "logger": self._logger,
         }
 
     def __repr__(self) -> str:
@@ -154,5 +166,105 @@ class ComponentBuilder:
         return self.Component(**self._kwargs)
 
 
+def main():
+    """
+    Main function
+    """
+    # local import to not interfere in global imports::
+    from eraser import Eraser, MISSING_DATA_STRATEGY_MODULE
+    from crowner import Crowner, PLAN_STRATEGY_MODULE
+    from reviewer import Reviewer, MEASURE_STRATEGY_MODULE
+
+    # Parse command line arguments
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "-i", "--input_file", help="Name of the input file", required=True
+    )
+    parser.add_argument(
+        "-o", "--output_file", help="Name of the output file", required=True
+    )
+    parser.add_argument(
+        "-a", "--attribute", help="Name of the attribute to erase values", required=True
+    )
+    parser.add_argument(
+        "-r",
+        "--missing_rate",
+        type=missing_rate_float,
+        default=0.3,
+        help="The rate in which the attribute values will be erased",
+    )
+    parser.add_argument(
+        "-q",
+        "--query",
+        default="",
+        help="The query to apply NMAR mechanism. A string as in the example 'x > 3 & x < 5 | x == 7', where x represents values in the chosen column. Valid tokens: x, ==, >, >=, <, <=, &, |, (, )",
+    )
+    parser.add_argument(
+        "-em",
+        "--eraser-mechanism",
+        default="MCAR",
+        choices=("MCAR", "MAR", "NMAR"),
+        help="Missing data mechanism to be applied",
+    )
+    parser.add_argument(
+        "-cp",
+        "--crowner-plan",
+        default="Mean",
+        choices=("Mean", "nd", "NormalDistribution", "KNN"),
+        help="imputation plan to be used. The default value of this is mean",
+    )
+    parser.add_argument(
+        "-rm",
+        "--reviewer-measure",
+        default="MSE",
+        choices=("MSE", "EUC", "MIN", "MAN", "MAH"),
+        help="Input measure to be used",
+    )
+    args = vars(parser.parse_args())
+
+    input_file = args["input_file"]
+    output_file = args["output_file"]
+    attribute = args["attribute"]
+    missing_rate = args["missing_rate"]
+    query = args["query"]
+    eraser_mechanism = args["eraser_mechanism"]
+    crowner_plan = args["crowner_plan"]
+
+    if crowner_plan == "nd":
+        crowner_plan = "NormalDistribution"
+
+    reviewer_measure = args["reviewer_measure"]
+
+    eraser_strategy = str_to_class(MISSING_DATA_STRATEGY_MODULE, eraser_mechanism)
+    crowner_strategy = str_to_class(PLAN_STRATEGY_MODULE, crowner_plan)
+    reviewer_strategy = str_to_class(MEASURE_STRATEGY_MODULE, reviewer_measure)
+
+    p = (
+        Pipeline()
+        .add_component(
+            ComponentBuilder(Eraser)
+            .column_name(attribute)
+            .missing_rate(missing_rate)
+            .strategy(eraser_strategy)
+            .build()
+        )
+        .add_component(
+            ComponentBuilder(Crowner)
+            .column_name(attribute)
+            .strategy(crowner_strategy)
+            .build()
+        )
+        .add_component(
+            ComponentBuilder(Reviewer)
+            .column_name(attribute)
+            .strategy(reviewer_strategy)
+            .build()
+        )
+    )(input_file)
+
+    p.save(output_file)
+    # python3 pipeline.py -i bla.csv -o wtf.csv -a sepal.length -em MCAR -cp mean -rm MSE
+
+
 if __name__ == "__main__":
-    ...
+    main()

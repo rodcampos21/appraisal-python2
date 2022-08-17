@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from abc import ABC, abstractmethod
-from utils import CategoricalDataException, Csv
+from utils import CategoricalDataException, Csv, Logging
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
@@ -10,11 +10,12 @@ from sklearn.preprocessing import MinMaxScaler
 
 class IImputationPlanStrategy(ABC):
     """
-        Abstract base class ImputationPlan.
-        All imputation plans needs inherit from this base class.
+    Abstract base class ImputationPlan.
+    All imputation plans needs inherit from this base class.
     """
+
     @abstractmethod
-    def execute(self, csv: Csv, column_name: str) -> None:
+    def execute(self, csv: Csv, column_name: str, logger: Logging) -> None:
         pass
 
 
@@ -23,7 +24,7 @@ class Mean(IImputationPlanStrategy):
     Implement a imputation plan strategy.
     """
 
-    def execute(self, df: DataFrame, column_name: str) -> DataFrame:
+    def execute(self, df: DataFrame, column_name: str, logger: Logging) -> DataFrame:
         """_summary_
 
         Args:
@@ -46,7 +47,7 @@ class NormalDistribution(IImputationPlanStrategy):
     a normal distribution.
     """
 
-    def execute(self, df: DataFrame, column_name: str) -> DataFrame:
+    def execute(self, df: DataFrame, column_name: str, logger: Logging) -> DataFrame:
         """_summary_
 
         Args:
@@ -80,7 +81,7 @@ class KNN(IImputationPlanStrategy):
     Compute the missing values, inserting random data with KNN.
     """
 
-    def execute(self, df: DataFrame, column_name: str) -> DataFrame:
+    def execute(self, df: DataFrame, column_name: str, logger: Logging) -> DataFrame:
         """_summary_
 
         Args:

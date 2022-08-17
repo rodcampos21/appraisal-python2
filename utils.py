@@ -78,8 +78,8 @@ def str_to_class(module_name: str, class_name: str):
         module_ = importlib.import_module(module_name)
         try:
             class_ = getattr(module_, class_name)()
+            return class_ or None
         except AttributeError:
             print("Class does not exist")
     except ImportError:
         print("Module does not exist")
-    return class_ or None

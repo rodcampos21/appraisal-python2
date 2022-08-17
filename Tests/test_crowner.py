@@ -9,7 +9,7 @@ from utils import CategoricalDataException, Logging
 
 class TestCrowner(unittest.TestCase):
     def setUp(self):
-        self.input_file = "iris_missing.csv"
+        self.input_file = "iris_missing_test.csv"
         self.input_file_non_categorical = "iris_missing_noncategorical.csv"
         self.output_file = "crowner_test.csv"
 
