@@ -4,7 +4,19 @@ O objetivo desse trabalho é a portabilidade do sistema appraisal para a língua
 
 ## [](https://github.com/leomath42/appraisal#o-que-%C3%A9-o-appraisal-)O que é o Appraisal ?
 
-O **appraisal** é um sistema para imputação de dados ausentes em conjuntos de dados tabulares em projetos de AM(Aprendizado de Máquina) e esse sistema pode também gerar e validar novos valores para esses dados ausentes com base em diferentes abordagens.
+O **appraisal** é um sistema para imputação de dados ausentes em conjuntos de dados tabulares em projetos de AM (Aprendizado de Máquina) e esse sistema pode também gerar e validar novos valores para esses dados ausentes com base em diferentes abordagens.
+
+## Instalação
+
+Recomendamos a instalação das dependências e execução da aplicação num ambiente virtual.
+
+    $ pip install virtualenv
+    $ virtualenv venv
+    $ . venv/bin/activate
+
+Instalação das dependências:
+
+    $ pip install -r requirements.txt
 
 ## Módulos
 
