@@ -91,6 +91,31 @@ Um exemplo de chamada do módulo Reviewer é o seguinte:
 
     python reviewer.py -o iris.csv -f iris_filled.csv -m MSE -a sepal.length
 
+### Pipeline 
+
+Módulo responsável por gerenciar a pipeline do appraisal, utilizando todos os demais módulos como componentes.
+
+Sintaxe:
+
+    python pipeline.py -i <ifile> -o <ofile> -a <att> -r <missing_rate> -q <query> -em <eraser_mech> -cp <crowner_plan> -rm <reviwer_measure> 
+
+
+Na sintaxe acima:
+
+- **ofile**: nome do arquivo original, sem dados faltantes, em formato csv.
+- **ffile**: nome do arquivo resultante da execução de um plano de imputação (usando o módulo Crowner), em formato csv.
+- **att**: nome do atributo sobre o qual fazer a comparação.
+- **missing_rate**: valor entre 0 e 1, que define a taxa de valores ausentes a serem produzidos.
+- **query**: query para ser utilizada no módulo eraser (Opcional, somente utilizado em algumas estratégias).
+- **eraser_mech**: mecanismo de ausência a ser aplicado.
+- **crowner_plan**: plano de imputação a ser usado. O valor default deste argumento deve ser "mean", o que significa que os valores ausentes devem ser preenchidos com a média dos valores existentes.
+- **reviwer_measure**: métrica de erro a ser usada.
+
+Um exemplo de chamada do módulo Pepilne é o seguinte:
+
+python3 pipeline.py -i iris_non_categorical.csv -o test.csv -a "sepal.length" -q "x>= 1 | x<=6" -r .3 -em NMAR -cp KNN -rm MSE
+
+
 ### Testes Unitários
 
 Os módulos de testes unitários estão agrupados na pasta 'Tests'.
