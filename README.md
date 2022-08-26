@@ -98,3 +98,7 @@ Os módulos de testes unitários estão agrupados na pasta 'Tests'.
 Um exemplo de executação dos testes unitários de um módulo:
 
     python -m unittest Tests/test_eraser.py
+
+Para executar todos os testes unitários:
+
+    python -m unittest discover Tests
