@@ -65,7 +65,7 @@ class TestEraserMCAR(unittest.TestCase):
 class TestEraserNMAR(unittest.TestCase):
     def setUp(self):
         self.input_file = "iris.csv"
-        self.output_file = "iris_missing.csv"
+        self.output_file = "Tests/iris_missing.csv"
 
     def test_eraser_nmar_success_case(self):
         """
