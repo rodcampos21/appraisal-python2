@@ -1,9 +1,5 @@
 from __future__ import annotations
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from typing import TYPE_CHECKING
-from typing import Union
-
-
 from pandas import DataFrame as _DataFrame
 import pandas as pd
 

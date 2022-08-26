@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from numpy import NaN
 import pandas as pd
 import re
-
 from utils import Logging
 
 
