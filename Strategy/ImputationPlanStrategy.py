@@ -15,7 +15,7 @@ class IImputationPlanStrategy(ABC):
     """
 
     @abstractmethod
-    def execute(self, csv: Csv, column_name: str, logger: Logging) -> None:
+    def execute(self, df: DataFrame, column_name: str, logger: Logging) -> None:
         pass
 
 

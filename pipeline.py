@@ -242,6 +242,7 @@ def main():
             .column_name(attribute)
             .missing_rate(missing_rate)
             .strategy(eraser_strategy)
+            .query(query)
             .build()
         )
         .add_component(
@@ -259,7 +260,6 @@ def main():
     )(input_file)
 
     p.save(output_file)
-    # python3 pipeline.py -i bla.csv -o wtf.csv -a sepal.length -em MCAR -cp mean -rm MSE
 
 
 if __name__ == "__main__":
