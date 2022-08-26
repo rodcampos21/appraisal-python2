@@ -1,19 +1,13 @@
 import unittest
-from unittest.mock import patch
 import pandas as pd
 from Strategy.MissingDataStrategy import MCAR, NMAR
 from eraser import Eraser
-import os
 
 
 class TestEraserMCAR(unittest.TestCase):
     def setUp(self):
         self.input_file = "iris.csv"
-        self.output_file = "iris_missing.csv"
-
-    def tearDown(self):
-        if os.path.exists("iris_missing.csv"):
-            os.remove("iris_missing.csv")
+        self.output_file = "Tests/iris_missing.csv"
 
     def test_eraser_mcar_success_case(self):
         """
@@ -72,10 +66,6 @@ class TestEraserNMAR(unittest.TestCase):
     def setUp(self):
         self.input_file = "iris.csv"
         self.output_file = "iris_missing.csv"
-
-    def tearDown(self):
-        if os.path.exists("iris_missing.csv"):
-            os.remove("iris_missing.csv")
 
     def test_eraser_nmar_success_case(self):
         """
