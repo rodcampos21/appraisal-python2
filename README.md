@@ -1,39 +1,39 @@
-## Objective
+## Objetivo
 
-The objective of this work is the portability of the appraisal system to the Python language and, in addition, to provide a tool that supports this system, in other words, to develop a framework.
+O objetivo desse trabalho é a portabilidade do sistema appraisal para a línguagem Python e além disso, disponibilizar um ferramental que suporte esse sistema, ou seja, desenvolver um framework.
 
-## [](https://github.com/leomath42/appraisal#o-que-%C3%A9-o-appraisal-)What is Appraisal?
+## [](https://github.com/leomath42/appraisal#o-que-%C3%A9-o-appraisal-)O que é o Appraisal ?
 
-**Appraisal** is a system for imputing missing data in tabular datasets in AM (Machine Learning) projects and this system can also generate and validate new values for this missing data based on different approaches.
+O **appraisal** é um sistema para imputação de dados ausentes em conjuntos de dados tabulares em projetos de AM (Aprendizado de Máquina) e esse sistema pode também gerar e validar novos valores para esses dados ausentes com base em diferentes abordagens.
 
-## Installation
+## Instalação
 
-We recommend installing the dependencies and running the application in a virtual environment
+Recomendamos a instalação das dependências e execução da aplicação num ambiente virtual.
 
     $ pip install virtualenv
     $ virtualenv venv
     $ . venv/bin/activate
 
-Installation of dependencies:
+Instalação das dependências:
 
     $ pip install -r requirements.txt
 
-## Modules
+## Módulos
 
 ### Eraser
 
-Module responsible for erasing values from a given column of the provided dataset.
+Módulo responsável por apagar valores de uma determinada coluna do dataset fornecido.
 
-Syntax:
+Sintaxe:
 
     python eraser.py -i <ifile> -o <ofile> -m <mech> -a <att> -r <missing_rate>
 
-In the syntax above:
+Na sintaxe acima:
 
-- **ifile**: input file name, in csv format.
-- **ofile**: output file name, in csv format.
-- **att**: attribute name on which simulate missing values.
-- **mech**: absence mechanism to be applied. Possible mechanisms  (all described in this  [document](https://eic.cefet-rj.br/~jsoares/wp-content/uploads/2021/03/Imputac%CC%A7a%CC%83o-Hot-Deck-Uma-Revisa%CC%83o-Sistema%CC%81tica-da-Literatura-versa%CC%83o-final.pdf)) are:
+- **ifile**: nome do arquivo de entrada, em formato csv.
+- **ofile**: nome do arquivo de saída, em formato csv.
+- **att**: nome do atributo sobre o qual simular valores ausentes.
+- **mech**: mecanismo de ausência a ser aplicado. Mecanismos possíveis (todos descritos neste [documento](https://eic.cefet-rj.br/~jsoares/wp-content/uploads/2021/03/Imputac%CC%A7a%CC%83o-Hot-Deck-Uma-Revisa%CC%83o-Sistema%CC%81tica-da-Literatura-versa%CC%83o-final.pdf)) são:
 
   - "**MCAR**" (Missing Completely At Random)
 
@@ -41,90 +41,89 @@ In the syntax above:
 
   - "**NMAR**" (Not Missing At Random)
 
-- **missing_rate**: value between 0 and 1, which defines the rate of missing values to be produced.
+- **missing_rate**: valor entre 0 e 1, que define a taxa de valores ausentes a serem produzidos.
 
-An example of a Eraser module call is : 
+Um exemplo de chamada do módulo Eraser é o seguinte:
 
     python eraser.py -i iris.csv -o iris_missing.csv -m MCAR -a sepal.length -r .3
 
-In case the mechanism chosen is NMAR, an additional query parameter must be included, which receives an expression to filter the 'x' values of the column of the chosen attribute. Accepted Tokens: x, ==, >, >=, <, <=, &, |, (,).
+Em caso do mecanismo escolhido ser o NMAR, deve-se incluir um parâmetro adicional **query**, que recebe uma expressão para filtro nos valores 'x' da coluna do atributo escolhido. Tokens aceitos: x, ==, >, >=, <, <=, &, |, (,).
 
-An example of usage for this case is :
+Um exemplo de uso para este caso é o seguinte:
 
     python eraser.py -i iris.csv -o iris_missing.csv -m NMAR -a "sepal.length" -r .7 -q "x >= 1 | x<=6"
 
 ### Crowner
 
-Module responsible for imputing data in a column.
+Módulo responsável pela imputação de dados numa coluna.
 
-Syntax:
+Sintaxe:
 
     python crowner.py -i <ifile> -o <ofile> -p <plan> -a <att>
 
-In the syntax above:
+Na sintaxe acima:
 
-- **ifile**: input file name, in csv format.
-- **ofile**: output file name, in csv format.
-- **att**:  attribute name on which  fill in missing values.
-- **plan**: imputation plan to be used. The default value of this argument should be "mean", which means that missing values must be filled in with the average of the existing values. 
+- **ifile**: nome do arquivo de entrada, em formato csv.
+- **ofile**: nome do arquivo de saída, em formato csv.
+- **att**: nome do atributo sobre o qual preencher os valores ausentes.
+- **plan**: plano de imputação a ser usado. O valor default deste argumento deve ser "mean", o que significa que os valores ausentes devem ser preenchidos com a média dos valores existentes.
 
-A call example of the Crowner Module is : 
+Um exemplo de chamada do módulo Crowner é o seguinte:
 
     python crowner.py -i iris_missing.csv -o iris_filled.csv -p mean -a sepal.length
 
 ### Reviewer
 
-Module responsible for measuring the relative error between the original data and the imputed data.
+Módulo responsável pela medição de erro relativo entre os dados originais e os dados imputados.
 
-Syntax:
+Sintaxe:
 
     python reviewer.py -o <ofile> -f <ffile> -m <measure> -a <att>
 
-In the syntax above:
+Na sintaxe acima:
 
-- **ofile**: name of the original file, without missing data, in csv format.
-- **ffile**: name of the file resulting from the execution of an imputation plan (using the Crowner module), in csv format.
-- **att**: name of the attribute on which to compare.
-- **measure**: measure: error metric to be used. 
+- **ofile**: nome do arquivo original, sem dados faltantes, em formato csv.
+- **ffile**: nome do arquivo resultante da execução de um plano de imputação (usando o módulo Crowner), em formato csv.
+- **att**: nome do atributo sobre o qual fazer a comparação.
+- **measure**: métrica de erro a ser usada.
 
-An example of a Reviewer Module call is: 
+Um exemplo de chamada do módulo Reviewer é o seguinte:
 
     python reviewer.py -o iris.csv -f iris_filled.csv -m MSE -a sepal.length
 
 ### Pipeline 
 
-Module responsible for managing the appraisal pipeline, using all other modules as components.
+Módulo responsável por gerenciar a pipeline do appraisal, utilizando todos os demais módulos como componentes.
 
-Syntax:
+Sintaxe:
 
     python pipeline.py -i <ifile> -o <ofile> -a <att> -r <missing_rate> -q <query> -em <eraser_mech> -cp <crowner_plan> -rm <reviwer_measure> 
 
 
-In the syntax above:
+Na sintaxe acima:
 
-- **ofile**: name of the original file, without missing data, in csv format.
-- **ffile**:: name of the file resulting from the execution of an imputation plan (using the Crowner module), in csv format.
-- **att**: name of the attribute on which to compare.
-- **missing_rate**: value between 0 and 1, which defines the rate of missing values to be produced.
-- **query**: query to be used in the eraser module (Optional, only used in some strategies).
-- **eraser_mech**: absence mechanism to be applied.
-- **crowner_plan**: imputation plan to use. The default value of this argument should be "mean", which means that missing values must be filled in with the average of the existing values.
-- **reviwer_measure**: error metric to use.
+- **ofile**: nome do arquivo original, sem dados faltantes, em formato csv.
+- **ffile**: nome do arquivo resultante da execução de um plano de imputação (usando o módulo Crowner), em formato csv.
+- **att**: nome do atributo sobre o qual fazer a comparação.
+- **missing_rate**: valor entre 0 e 1, que define a taxa de valores ausentes a serem produzidos.
+- **query**: query para ser utilizada no módulo eraser (Opcional, somente utilizado em algumas estratégias).
+- **eraser_mech**: mecanismo de ausência a ser aplicado.
+- **crowner_plan**: plano de imputação a ser usado. O valor default deste argumento deve ser "mean", o que significa que os valores ausentes devem ser preenchidos com a média dos valores existentes.
+- **reviwer_measure**: métrica de erro a ser usada.
 
-An example of a Pipeline module call is:
+Um exemplo de chamada do módulo Pepilne é o seguinte:
 
 python3 pipeline.py -i iris_non_categorical.csv -o test.csv -a "sepal.length" -q "x>= 1 | x<=6" -r .3 -em NMAR -cp KNN -rm MSE
 
 
-### Unitary tests
+### Testes Unitários
 
-Unit test modules are grouped in the 'Tests' folder.
+Os módulos de testes unitários estão agrupados na pasta 'Tests'.
 
-An example of running the unit tests of a module:
-
+Um exemplo de executação dos testes unitários de um módulo:
 
     python -m unittest Tests/test_eraser.py
 
-To run all unit tests:
+Para executar todos os testes unitários:
 
     python -m unittest discover Tests
